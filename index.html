@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BareTag App</title>
+  <link rel="stylesheet" href="map.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+  <!-- Tab Navigation -->
+  <div class="tabs">
+    <button class="tab-button active" onclick="openTab(event, 'map')">Map</button>
+    <button class="tab-button" onclick="openTab(event, 'other')">Other</button>
+  </div>
+
+  <!-- Tab Content -->
+  <div id="map" class="tab-content active">
+    <div id="map-container"></div> <!-- Map container -->
+  </div>
+
+  <div id="other" class="tab-content">
+    <h2>Other Tab</h2>
+    <p>Content for the other tab goes here.</p>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="map.js"></script>
+  <script>
+    // Tab switching logic
+    function openTab(event, tabName) {
+      const tabContent = document.querySelectorAll('.tab-content');
+      const tabButtons = document.querySelectorAll('.tab-button');
+
+      // Hide all tab contents
+      tabContent.forEach(tab => tab.classList.remove('active'));
+
+      // Deactivate all buttons
+      tabButtons.forEach(button => button.classList.remove('active'));
+
+      // Activate the selected tab and its button
+      document.getElementById(tabName).classList.add('active');
+      event.currentTarget.classList.add('active');
+    }
+  </script>
+</body>
+</html>
