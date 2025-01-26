@@ -2,16 +2,16 @@ const fs = require('fs');
 const path = require('path');
 
 window.addEventListener('DOMContentLoaded', () => {
-  // Define the path to the dataTag.json file
   const dataPath = path.join(__dirname, 'dataTag.json');
-  let map; // Store the map instance for updates
-  let marker; // Store the marker instance for updates
+  let map; // Store the map instance
+  const markers = new Map(); // Store markers by tag ID for updates
 
-  // Function to initialize or update the map
-  function updateMap(lat, lng, name, id) {
+  // Function to initialize or update markers on the map
+  function updateMarkers(tags) {
     if (!map) {
-      // First time initializing the map
-      map = L.map('map-container').setView([lat, lng], 13);
+      // Initialize the map on the first tag's location
+      const firstTag = tags[0];
+      map = L.map('map-container').setView([firstTag.latitude, firstTag.longitude], 4);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
@@ -19,18 +19,32 @@ window.addEventListener('DOMContentLoaded', () => {
       }).addTo(map);
     }
 
-    if (marker) {
-      // Update the existing marker
-      marker.setLatLng([lat, lng]).bindPopup(`<b>${name}</b><br>ID: ${id}`).openPopup();
-    } else {
-      // Add a new marker
-      marker = L.marker([lat, lng])
-        .addTo(map)
-        .bindPopup(`<b>${name}</b><br>ID: ${id}`)
-        .openPopup();
+    // Remove markers that are no longer in the data
+    const currentIds = new Set(tags.map(tag => tag.id));
+    for (const [id, marker] of markers.entries()) {
+      if (!currentIds.has(id)) {
+        map.removeLayer(marker);
+        markers.delete(id);
+      }
     }
 
-    console.log(`Map updated: ${name} (${lat}, ${lng})`);
+    // Add or update markers for each tag
+    tags.forEach(tag => {
+      if (markers.has(tag.id)) {
+        // Update existing marker
+        const marker = markers.get(tag.id);
+        marker.setLatLng([tag.latitude, tag.longitude])
+          .bindPopup(`<b>${tag.name}</b><br>ID: ${tag.id}`);
+      } else {
+        // Create a new marker
+        const marker = L.marker([tag.latitude, tag.longitude])
+          .addTo(map)
+          .bindPopup(`<b>${tag.name}</b><br>ID: ${tag.id}`);
+        markers.set(tag.id, marker);
+      }
+    });
+
+    console.log(`Markers updated: ${tags.length} tags`);
   }
 
   // Function to load and parse dataTag.json
@@ -42,16 +56,14 @@ window.addEventListener('DOMContentLoaded', () => {
       }
 
       try {
-        const tagData = JSON.parse(data);
+        const tags = JSON.parse(data);
 
-        // Validate the data structure
-        if (!tagData.latitude || !tagData.longitude) {
-          console.error('Invalid coordinates in dataTag.json');
+        if (!Array.isArray(tags)) {
+          console.error('Invalid data format: Expected an array of tags');
           return;
         }
 
-        // Update the map with new data
-        updateMap(tagData.latitude, tagData.longitude, tagData.name, tagData.id);
+        updateMarkers(tags);
       } catch (parseError) {
         console.error('Error parsing JSON:', parseError);
       }
@@ -65,7 +77,7 @@ window.addEventListener('DOMContentLoaded', () => {
   fs.watch(dataPath, (eventType) => {
     if (eventType === 'change') {
       console.log('dataTag.json changed. Reloading...');
-      loadData(); // Reload the file and update the map
+      loadData();
     }
   });
 });
