@@ -21,3 +21,11 @@
     ```bash
     npm run build
     ```
+
+## App location
+
+### MAC
+File should be under:
+```bash
+/Baretag-Desktop-App/dist/mac-arm64/BareTag\ App.app 
+```
