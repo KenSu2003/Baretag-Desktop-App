@@ -3,7 +3,7 @@
 ## Installation
 1. Clone the repository:
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/KenSu2003/Baretag-Desktop-App.git
     cd Baretag-Desktop-App
     ```
 
