@@ -106,9 +106,10 @@ window.addEventListener('DOMContentLoaded', () => {
         if (currentLocationMarker) {
           currentLocationMarker.setLatLng([latitude, longitude]);
         } else {
-          currentLocationMarker = L.marker([latitude, longitude], { color: 'blue' })
+          currentLocationMarker = L.marker([latitude, longitude])
             .addTo(map)
-            .bindPopup('You are here');
+            .bindPopup('You are here')
+            .openPopup();
         }
 
         // Center the map on the current location
