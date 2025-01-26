@@ -6,6 +6,7 @@ window.addEventListener('DOMContentLoaded', () => {
   let map; // Store the map instance
   const markers = new Map(); // Store markers by tag ID
   let tagData = []; // Store the full data of tags
+  let currentLocationMarker; // Marker for the current location
 
   // Function to initialize or update markers on the map
   function updateMarkers(visibleTags) {
@@ -89,6 +90,42 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Function to find and display the current location
+  function showCurrentLocation() {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser.');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const { latitude, longitude } = position.coords;
+
+        // Add or update the current location marker
+        if (currentLocationMarker) {
+          currentLocationMarker.setLatLng([latitude, longitude]);
+        } else {
+          currentLocationMarker = L.marker([latitude, longitude], { color: 'blue' })
+            .addTo(map)
+            .bindPopup('You are here');
+        }
+
+        // Center the map on the current location
+        map.setView([latitude, longitude], 13);
+
+        console.log(`Current location: ${latitude}, ${longitude}`);
+      },
+      error => {
+        alert('Unable to retrieve your location.');
+        console.error('Geolocation error:', error);
+      }
+    );
+  }
+
+  // Add event listener for the "Show Current Location" button
+  const currentLocationBtn = document.getElementById('current-location-btn');
+  currentLocationBtn.addEventListener('click', showCurrentLocation);
 
   // Initial load of the dataTag.json
   loadData();
