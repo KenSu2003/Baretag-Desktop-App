@@ -4,13 +4,14 @@ const path = require('path');
 window.addEventListener('DOMContentLoaded', () => {
   const dataPath = path.join(__dirname, 'dataTag.json');
   let map; // Store the map instance
-  const markers = new Map(); // Store markers by tag ID for updates
+  const markers = new Map(); // Store markers by tag ID
+  let tagData = []; // Store the full data of tags
 
   // Function to initialize or update markers on the map
-  function updateMarkers(tags) {
+  function updateMarkers(visibleTags) {
     if (!map) {
       // Initialize the map on the first tag's location
-      const firstTag = tags[0];
+      const firstTag = visibleTags[0];
       map = L.map('map-container').setView([firstTag.latitude, firstTag.longitude], 4);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -19,32 +20,49 @@ window.addEventListener('DOMContentLoaded', () => {
       }).addTo(map);
     }
 
-    // Remove markers that are no longer in the data
-    const currentIds = new Set(tags.map(tag => tag.id));
-    for (const [id, marker] of markers.entries()) {
-      if (!currentIds.has(id)) {
-        map.removeLayer(marker);
-        markers.delete(id);
-      }
+    // Remove all markers
+    for (const marker of markers.values()) {
+      map.removeLayer(marker);
     }
+    markers.clear();
 
-    // Add or update markers for each tag
-    tags.forEach(tag => {
-      if (markers.has(tag.id)) {
-        // Update existing marker
-        const marker = markers.get(tag.id);
-        marker.setLatLng([tag.latitude, tag.longitude])
-          .bindPopup(`<b>${tag.name}</b><br>ID: ${tag.id}`);
-      } else {
-        // Create a new marker
-        const marker = L.marker([tag.latitude, tag.longitude])
-          .addTo(map)
-          .bindPopup(`<b>${tag.name}</b><br>ID: ${tag.id}`);
-        markers.set(tag.id, marker);
-      }
+    // Add markers for visible tags
+    visibleTags.forEach(tag => {
+      const marker = L.marker([tag.latitude, tag.longitude])
+        .addTo(map)
+        .bindPopup(`<b>${tag.name}</b><br>ID: ${tag.id}`);
+      markers.set(tag.id, marker);
     });
 
-    console.log(`Markers updated: ${tags.length} tags`);
+    console.log(`Markers updated: ${visibleTags.length} tags`);
+  }
+
+  // Function to populate the checkbox list
+  function populateTagList(tags) {
+    const tagList = document.getElementById('tag-list');
+    tagList.innerHTML = ''; // Clear the existing list
+
+    tags.forEach(tag => {
+      const listItem = document.createElement('li');
+      listItem.innerHTML = `
+        <label>
+          <input type="checkbox" data-id="${tag.id}" checked />
+          ${tag.name} (ID: ${tag.id})
+        </label>
+      `;
+      tagList.appendChild(listItem);
+    });
+
+    // Add event listeners to the checkboxes
+    const checkboxes = tagList.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', () => {
+        const visibleTags = tagData.filter(tag =>
+          tagList.querySelector(`input[data-id="${tag.id}"]`).checked
+        );
+        updateMarkers(visibleTags);
+      });
+    });
   }
 
   // Function to load and parse dataTag.json
@@ -63,7 +81,9 @@ window.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        updateMarkers(tags);
+        tagData = tags; // Save the tag data
+        populateTagList(tags); // Populate checkboxes
+        updateMarkers(tags); // Show all markers initially
       } catch (parseError) {
         console.error('Error parsing JSON:', parseError);
       }

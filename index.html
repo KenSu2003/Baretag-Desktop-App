@@ -8,15 +8,21 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
-  <!-- Tab Navigation -->
   <div class="tabs">
     <button class="tab-button active" onclick="openTab(event, 'map')">Map</button>
     <button class="tab-button" onclick="openTab(event, 'other')">Other</button>
   </div>
 
-  <!-- Tab Content -->
   <div id="map" class="tab-content active">
-    <div id="map-container"></div> <!-- Map container -->
+    <div class="container">
+      <!-- Sidebar for Checkboxes -->
+      <div id="sidebar">
+        <h3>Tags to Show</h3>
+        <ul id="tag-list"></ul>
+      </div>
+      <!-- Map -->
+      <div id="map-container"></div>
+    </div>
   </div>
 
   <div id="other" class="tab-content">
@@ -24,7 +30,6 @@
     <p>Content for the other tab goes here.</p>
   </div>
 
-  <!-- Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="map.js"></script>
   <script>
@@ -33,13 +38,9 @@
       const tabContent = document.querySelectorAll('.tab-content');
       const tabButtons = document.querySelectorAll('.tab-button');
 
-      // Hide all tab contents
       tabContent.forEach(tab => tab.classList.remove('active'));
-
-      // Deactivate all buttons
       tabButtons.forEach(button => button.classList.remove('active'));
 
-      // Activate the selected tab and its button
       document.getElementById(tabName).classList.add('active');
       event.currentTarget.classList.add('active');
     }

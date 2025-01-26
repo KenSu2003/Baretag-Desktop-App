@@ -36,11 +36,36 @@ body {
     display: block;
   }
   
+  .container {
+    display: flex;
+  }
+  
+  #sidebar {
+    width: 200px;
+    padding: 10px;
+    background-color: #f7f7f7;
+    border-right: 1px solid #ddd;
+    overflow-y: auto;
+  }
+  
   #map-container {
-    width: 100%;
+    flex: 1;
     height: 500px;
-    margin: 20px auto;
+    margin: 0;
     border: 1px solid #ddd;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  ul#tag-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  ul#tag-list li {
+    margin-bottom: 10px;
+  }
+  
+  ul#tag-list input[type="checkbox"] {
+    margin-right: 8px;
   }
   
